@@ -1,0 +1,16 @@
+# Unity generated
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+
+# VS/Rider generated
+.vs/
+.idea/
+*.csproj
+*.sln
+
+# Unity meta files
+*.meta
