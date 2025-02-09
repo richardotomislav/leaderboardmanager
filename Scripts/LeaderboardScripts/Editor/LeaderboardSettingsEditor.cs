@@ -1,5 +1,6 @@
-﻿
-using System.Linq;
+﻿using System.Linq;
+using System.Reflection;
+using LeaderboardCreatorEditor;
 using LeaderbordManager;
 
 namespace LeaderboardScripts.Editor
@@ -19,44 +20,46 @@ namespace LeaderboardScripts.Editor
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("Leaderboards", EditorStyles.boldLabel);
             EditorGUILayout.Space(5);
-            // Add a toggle for showing keys
-            // Add horizontal group for controls
-            EditorGUILayout.BeginHorizontal();
 
-            // Toggle for showing keys
             showKeys = EditorGUILayout.Toggle("Show Keys", showKeys);
 
-            // Add refresh button
-            if (GUILayout.Button("Refresh", GUILayout.Width(60)))
-            {
-                settings.RefreshLeaderboards();
-            }
-
-            EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space(10);
 
-            // Add button to open LeaderboardCreator window
             if (GUILayout.Button("Open Leaderboard Creator"))
             {
                 EditorApplication.ExecuteMenuItem("Leaderboard Creator/My Leaderboards");
             }
 
+            if (GUILayout.Button("Refresh Leaderboards"))
+            {
+                settings.RefreshLeaderboards();
+
+                var windowType = typeof(LeaderboardCreatorWindow);
+                var method = windowType.GetMethod("SaveLeaderboardsToScript",
+                    BindingFlags.NonPublic | BindingFlags.Static);
+
+                if (method != null)
+                {
+                    method.Invoke(null, null);
+                }
+                else
+                {
+                    Debug.LogWarning("Could not find SaveLeaderboardsToScript method");
+                }
+            }
+
             EditorGUILayout.Space(10);
 
-            // Rest of your inspector code...
             if (settings.leaderboards != null && settings.leaderboards.Any())
             {
                 foreach (var entry in settings.leaderboards)
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
-                    // Show leaderboard name (read-only)
                     EditorGUILayout.LabelField("Name", entry.name);
 
-                    // Show keys if toggle is on
                     if (showKeys)
                     {
-                        // Get reference from Leaderboards class
                         var field = typeof(Dan.Main.Leaderboards).GetField(entry.name);
                         if (field != null)
                         {
@@ -70,7 +73,6 @@ namespace LeaderboardScripts.Editor
                         }
                     }
 
-                    // Allow type modification
                     entry.type = (LeaderboardType)EditorGUILayout.EnumPopup("Type", entry.type);
 
                     EditorGUILayout.EndVertical();
@@ -83,6 +85,7 @@ namespace LeaderboardScripts.Editor
                     "No leaderboards found. Add leaderboards through the Leaderboard Creator window.",
                     MessageType.Info);
             }
+
             var unsetTypes = settings.leaderboards?.Where(l => l.type == LeaderboardType.None).ToList();
             if (unsetTypes != null && unsetTypes.Any())
             {
@@ -93,7 +96,8 @@ namespace LeaderboardScripts.Editor
                 EditorGUILayout.Space(5);
             }
 
-
+            EditorGUILayout.HelpBox(
+                "If no new leaderboards appear, remember to 'Save to C# Script' in the Leaderboard Creator window. Or press 'Refresh Leaderboards'",MessageType.Info);
             if (GUI.changed)
             {
                 EditorUtility.SetDirty(settings);

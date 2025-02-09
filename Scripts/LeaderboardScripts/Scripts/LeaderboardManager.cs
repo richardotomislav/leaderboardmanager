@@ -74,14 +74,14 @@ namespace LeaderbordManager
     /// </remarks>
     public class LeaderboardManager : MonoBehaviour
     {
-        #region Singleton
-
-        /// <summary>
-        /// Singleton instance of the LeaderboardManager.
-        /// </summary>
-        public static LeaderboardManager Instance { get; private set; }
-
-        #endregion
+        // #region Singleton
+        //
+        // /// <summary>
+        // /// Singleton instance of the LeaderboardManager.
+        // /// </summary>
+        // public static LeaderboardManager Instance { get; private set; }
+        //
+        // #endregion
 
         #region Constants
 
@@ -181,14 +181,14 @@ namespace LeaderbordManager
             private void Awake()
             {
 
-                if (Instance != null && Instance != this)
-                {
-                    Destroy(gameObject);
-                    return;
-                }
-
-                Instance = this;
-                DontDestroyOnLoad(gameObject);
+                // if (Instance != null && Instance != this)
+                // {
+                //     Destroy(gameObject);
+                //     return;
+                // }
+                //
+                // Instance = this;
+                // DontDestroyOnLoad(gameObject);
 
                 // Initialize score submission event
                 if (submitScoreEvent == null)
@@ -298,20 +298,20 @@ namespace LeaderbordManager
                     return;
                 }
 
-                var entry = settings.leaderboards.Find(x => x.name == leaderboardName);
-                if (entry == null)
+                var foundLeaderboard = settings.leaderboards.Find(x => x.name == leaderboardName);
+                if (foundLeaderboard == null)
                 {
                     Debug.LogError($"Leaderboard {leaderboardName} configuration not found!");
                     return;
                 }
 
-                currentLeaderboardType = entry.type;
+                currentLeaderboardType = foundLeaderboard.type;
                 globalScore = score;
                 leaderboardExtra = extra;
 
-                SetCurrentLeaderboard(entry.type);
-                SpawnHeader(headerTypes[entry.type]);
-                GetLeaderboardEntries(entry.type);
+                SetCurrentLeaderboard(foundLeaderboard.type);
+                SpawnHeader(headerTypes[foundLeaderboard.type]);
+                GetLeaderboardEntries(foundLeaderboard.type);
             }
 
             /// <summary>
@@ -437,11 +437,11 @@ namespace LeaderbordManager
             /// <exception cref="ArgumentException">If the leaderboard type is unknown</exception>
             private LeaderboardReference GetLeaderboardReference(LeaderboardType type)
             {
-                var entry = settings.leaderboards.Find(x => x.type == type);
-                if (entry == null)
+                var setLeaderboard = settings.leaderboards.Find(x => x.type == type);
+                if (setLeaderboard == null)
                     throw new InvalidOperationException($"No leaderboard configured for type {type}");
 
-                return leaderboardRefs[entry.name];
+                return leaderboardRefs[setLeaderboard.name];
             }
 
             /// <summary>
@@ -733,7 +733,7 @@ namespace LeaderbordManager
             {
                 float startTime = Time.unscaledTime;
                 Debug.Log($"Starting LeaderboardManager auto refresh...");
-                Instance.GetLeaderboardEntries(currentLeaderboardType);
+                GetLeaderboardEntries(currentLeaderboardType);
                 yield return waitTime;
                 float duration = Time.unscaledTime - startTime;
                 Debug.Log($"LeaderboardManager refresh took {duration:F2} seconds");
